@@ -1,2 +1,2 @@
-ES6 Basics
-Introduction to ES6 Basics, Javascript
+ALX Backend JavaScript
+This repository is about some of the basic JavaScripts used in backend
