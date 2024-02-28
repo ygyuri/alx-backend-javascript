@@ -1,38 +1,60 @@
 const fs = require('fs');
 
 function countStudents(path) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (error, data) => {
+  const promise = new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf-8', (error, results) => {
       if (error) {
-        reject(new Error('Cannot load the database'));
+        reject(Error('Cannot load the database'));
       } else {
-        const lines = data
-          .split('\n')
-          .filter((line) => line.trim() !== ''); // Split lines and remove empty lines
+        const lines = results.split('\n');
+        let i = 0;
+        let countStudents = 0;
+        let msg = '';
         const fields = {};
-        for (const line of lines) {
-          const [firstName, , , field] = line.split(',');
-          if (field === 'field') {
-            // Skip the header line
-            continue;  // eslint-disable-line
+
+        const getLines = () => {
+          for (const line of lines) {
+            if (line.trim() !== '' && i > 0) {
+              countStudents += 1;
+              const [fname, lname, age, field] = line.split(','); // eslint-disable-line
+              if (!fields[field]) {
+                fields[field] = {
+                  count: 1,
+                  students: [fname],
+                };
+              } else {
+                const newCount = fields[field].count + 1;
+                const newStudents = fields[field].students.concat(fname);
+                fields[field] = {
+                  count: newCount,
+                  students: newStudents,
+                };
+              }
+            }
+            i += 1;
           }
-          if (!fields[field]) {
-            fields[field] = [];
+        };
+
+        const display = async () => {
+          getLines();
+          console.log(`Number of students: ${countStudents}`);
+          msg += `Number of students: ${countStudents}\n`;
+          for (const field of Object.keys(fields)) {
+            const n = fields[field].count;
+            const names = fields[field].students.join(', ');
+            console.log(`Number of students in ${field}: ${n}. List: ${names}`);
+            msg += `Number of students in ${field}: ${n}. List: ${names}\n`;
           }
-          fields[field].push(firstName);
-        }
-        console.log(`Number of students: ${lines.length - 1}`); // Exclude the header line
-        for (const [field, students] of Object.entries(fields)) {
-          console.log(
-            `Number of students in ${field}: ${
-              students.length
-            }. List: ${students.join(', ')}`,
-          );
-        }
-        resolve();
+          msg = msg.slice(0, -1);
+        };
+
+        display();
+        resolve(msg);
       }
     });
   });
+
+  return promise;
 }
 
 module.exports = countStudents;

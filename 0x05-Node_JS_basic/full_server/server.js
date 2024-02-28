@@ -1,16 +1,15 @@
-import express from "express";
-import router from "./routes"; // Make sure the path is correct
+const express = require('express');
+const router = require('./routes/index');
 
 const app = express();
+const port = 1245;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/", router);
-
-const port = process.env.PORT || 1245;
+app.use('/', router);
+app.use('/students', router);
+app.use('/students/:major', router);
 
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+  console.log(`Listening at http://localhost:${port}`);
 });
 
-export default app;
+module.exports = app;
